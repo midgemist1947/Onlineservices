@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Anndaan — Rescue surplus food before the timer runs out</title>
+<meta name="description" content="Anndaan connects restaurants with surplus food to nearby buyers and verified NGOs, in real time, before it goes to waste.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===================== NAVBAR ===================== -->
+<header class="navbar">
+  <div class="navbar__inner">
+    <a href="#home" class="brand" data-nav="home">
+      <img src="images/logo.svg" alt="" class="brand__mark" width="36" height="36">
+      <span class="brand__name">Anndaan</span>
+    </a>
+
+    <nav class="navlinks" id="navlinks">
+      <a href="#home" data-nav="home">Home</a>
+      <a href="#browse" data-nav="browse">Browse Food</a>
+      <a href="#dashboard" data-nav="dashboard">Dashboard</a>
+      <a href="#safety" data-nav="safety">Food Safety</a>
+      <a href="#about" data-nav="about">About</a>
+    </nav>
+
+    <div class="navbar__actions">
+      <button class="bell" id="bellBtn" aria-label="Notifications" title="Notifications">
+        🔔<span class="bell__dot" id="bellDot" hidden></span>
+      </button>
+      <div class="notif-panel" id="notifPanel" hidden>
+        <div class="notif-panel__head">Notifications</div>
+        <div id="notifList" class="notif-panel__list"><p class="muted">No notifications yet.</p></div>
+      </div>
+
+      <div id="authArea" class="auth-area">
+        <a href="#auth" class="btn btn--ghost" data-nav="auth">Log in</a>
+        <a href="#auth" class="btn btn--primary" data-nav="auth">Sign up</a>
+      </div>
+      <div id="userArea" class="user-area" hidden>
+        <span id="userChip" class="user-chip"></span>
+        <button class="btn btn--ghost" id="logoutBtn">Log out</button>
+      </div>
+    </div>
+
+    <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
+  </div>
+</header>
+
+<main id="app">
+
+<!-- ===================== HOME ===================== -->
+<section class="page" id="page-home">
+
+  <section class="hero">
+    <div class="hero__grid">
+      <div class="hero__copy">
+        <p class="eyebrow">LISTED → CLAIMED → PICKED UP</p>
+        <h1 class="display">Good food<br>shouldn't have<br>a dead end.</h1>
+        <p class="hero__lede">Anndaan turns a restaurant's end-of-day surplus into a claimable ticket — sold at a discount to nearby buyers, or handed free to verified NGOs when the clock runs low. Every listing carries a countdown. Nothing sits, nothing spoils.</p>
+        <div class="hero__cta">
+          <a href="#auth" class="btn btn--primary btn--lg" data-nav="auth">List surplus food</a>
+          <a href="#browse" class="btn btn--outline btn--lg" data-nav="browse">Browse nearby food</a>
+        </div>
+        <div class="hero__stats" id="heroStats">
+          <div><strong id="statMeals">0</strong><span>meals rescued on Anndaan</span></div>
+          <div><strong id="statNgo">0</strong><span>NGO donations completed</span></div>
+          <div><strong id="statCo2">0</strong><span>kg CO₂e avoided (est.)</span></div>
+        </div>
+      </div>
+
+      <div class="hero__ticket-wrap" aria-hidden="true">
+        <div class="ticket ticket--demo">
+          <div class="ticket__row">
+            <span class="ticket__tag">DISCOUNTED</span>
+            <span class="ticket__timer mono" id="demoTimer">18:42</span>
+          </div>
+          <h3 class="ticket__item">Veg Thali — 12 portions</h3>
+          <p class="ticket__meta">Hotel Green Leaf · 0.8 km away</p>
+          <div class="ticket__price">
+            <span class="strike">₹120</span><span class="now">₹60</span>
+          </div>
+          <div class="ticket__perf" aria-hidden="true"></div>
+          <div class="ticket__stub">
+            <span>PICKUP BY 9:40 PM</span>
+            <span class="mono">#AD-7241</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROBLEM -->
+  <section class="section" id="problem">
+    <p class="eyebrow">THE PROBLEM, SIZED</p>
+    <h2 class="h2">India throws away what it can't afford to lose</h2>
+    <div class="stat-row">
+      <div class="stat-card">
+        <span class="stat-card__num mono">67M</span>
+        <span class="stat-card__label">tonnes of food wasted in India every year</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__num mono">$14B+</span>
+        <span class="stat-card__label">estimated annual cost of that waste</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__num mono">⅓</span>
+        <span class="stat-card__label">of all food produced never reaches a table</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-card__num mono">795M</span>
+        <span class="stat-card__label">people undernourished worldwide</span>
+      </div>
+    </div>
+    <p class="muted small">Figures are industry estimates cited widely in food-waste research (IRJMETS, EatRightIndia) — shown for context, not audited data.</p>
+  </section>
+
+  <!-- LANDSCAPE -->
+  <section class="section section--alt" id="landscape">
+    <p class="eyebrow">WHO'S ALREADY IN THIS SPACE</p>
+    <h2 class="h2">Two good models. Neither one is self-serve.</h2>
+    <div class="compare">
+      <div class="compare__card">
+        <h3>Paid surplus apps</h3>
+        <p>Restaurants list unsold food at a steep discount; buyers pick it up directly, cutting delivery waste. Great for the discount side — but no route for food that nobody buys in time.</p>
+      </div>
+      <div class="compare__card">
+        <h3>Volunteer redistribution</h3>
+        <p>NGOs run a helpline: someone calls in surplus from an event, volunteers physically collect and deliver it within the hour. It works, but it's manual routing by phone, not a platform.</p>
+      </div>
+      <div class="compare__card">
+        <h3>Government alliances</h3>
+        <p>Policy-level networks connect food businesses to recovery agencies and NGOs. Strong for coordination and standards — not built as a day-to-day consumer product.</p>
+      </div>
+      <div class="compare__card compare__card--highlight">
+        <h3>Anndaan</h3>
+        <p>One self-serve platform for both tracks: discounted surplus for nearby buyers <em>and</em> free NGO donation — with a countdown that automatically escalates unclaimed food to NGOs before it expires.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="section" id="how">
+    <p class="eyebrow">HOW A LISTING MOVES</p>
+    <h2 class="h2">From kitchen to claim in three states</h2>
+    <div class="flow">
+      <div class="flow__step">
+        <span class="flow__badge">LISTED</span>
+        <h3>Restaurant lists surplus</h3>
+        <p>Item, quantity, price (₹0 to donate), prep time, and a pickup window — say, "claim within 90 minutes." A countdown starts immediately.</p>
+      </div>
+      <div class="flow__arrow" aria-hidden="true">→</div>
+      <div class="flow__step">
+        <span class="flow__badge">CLAIMED</span>
+        <h3>Nearest claimant is notified first</h3>
+        <p>Regular buyers claim discounted food; verified NGOs claim free or bulk donations. If nobody claims it in time, it auto-escalates to NGOs, free.</p>
+      </div>
+      <div class="flow__arrow" aria-hidden="true">→</div>
+      <div class="flow__step">
+        <span class="flow__badge">PICKED UP</span>
+        <h3>OTP handoff confirms it</h3>
+        <p>The claimant shows a 4-digit code at pickup. The restaurant enters it to close the listing — proof it was collected, not wasted.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVENUE -->
+  <section class="section section--alt" id="revenue">
+    <p class="eyebrow">HOW ANNDAAN SUSTAINS ITSELF</p>
+    <h2 class="h2">Revenue model</h2>
+    <div class="revenue-grid">
+      <div class="revenue-card">
+        <span class="revenue-card__pct mono">5–10%</span>
+        <h3>Commission on paid claims</h3>
+        <p>A small cut of discounted-surplus transactions between restaurants and regular buyers.</p>
+      </div>
+      <div class="revenue-card">
+        <span class="revenue-card__pct mono">₹0</span>
+        <h3>Free for NGO donations</h3>
+        <p>No fee on donation listings — keeps Anndaan eligible for CSR partnerships and grant funding, and keeps the incentive to donate intact.</p>
+      </div>
+      <div class="revenue-card">
+        <span class="revenue-card__pct mono">₹/mo</span>
+        <h3>Analytics subscription</h3>
+        <p>Optional tier for restaurants who want waste trends, peak-surplus times, and donation-tax summaries.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section cta-band">
+    <h2 class="h2">Every plate has somewhere to go.</h2>
+    <p class="hero__lede">Sign up as a restaurant, a regular buyer, or a verified NGO — it takes under a minute.</p>
+    <a href="#auth" class="btn btn--primary btn--lg" data-nav="auth">Get started</a>
+  </section>
+
+</section>
+
+<!-- ===================== AUTH ===================== -->
+<section class="page" id="page-auth" hidden>
+  <div class="auth-wrap">
+    <div class="auth-card">
+      <div class="tabs">
+        <button class="tab active" data-tab="login">Log in</button>
+        <button class="tab" data-tab="signup">Sign up</button>
+      </div>
+
+      <!-- LOGIN -->
+      <form id="loginForm" class="form">
+        <label>Email
+          <input type="email" id="loginEmail" required placeholder="you@example.com">
+        </label>
+        <label>Password
+          <input type="password" id="loginPassword" required placeholder="••••••••">
+        </label>
+        <p class="form__error" id="loginError"></p>
+        <button class="btn btn--primary btn--block" type="submit">Log in</button>
+        <p class="form__hint">Demo accounts: <button type="button" class="link" data-demo="restaurant">restaurant</button> · <button type="button" class="link" data-demo="ngo">NGO</button> · <button type="button" class="link" data-demo="user">buyer</button></p>
+      </form>
+
+      <!-- SIGNUP -->
+      <form id="signupForm" class="form" hidden>
+        <label>I am signing up as
+          <select id="signupRole">
+            <option value="user">Regular buyer</option>
+            <option value="restaurant">Restaurant / shop</option>
+            <option value="ngo">NGO</option>
+          </select>
+        </label>
+        <label>Name / Organisation name
+          <input type="text" id="signupName" required placeholder="e.g. Hotel Green Leaf">
+        </label>
+        <label id="signupRegWrap" hidden>NGO registration number
+          <input type="text" id="signupReg" placeholder="e.g. KL/NGO/2019/0451">
+        </label>
+        <label>Email
+          <input type="email" id="signupEmail" required placeholder="you@example.com">
+        </label>
+        <label>Phone
+          <input type="tel" id="signupPhone" required placeholder="10-digit mobile number">
+        </label>
+        <label>Password
+          <input type="password" id="signupPassword" required placeholder="At least 6 characters">
+        </label>
+        <label>Address / area
+          <input type="text" id="signupAddress" required placeholder="e.g. MG Road, Kochi">
+        </label>
+        <p class="form__error" id="signupError"></p>
+        <button class="btn btn--primary btn--block" type="submit">Create account</button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DASHBOARD (role-aware) ===================== -->
+<section class="page" id="page-dashboard" hidden>
+
+  <div class="dash-locked" id="dashLocked">
+    <h2 class="h2">You need an account for this</h2>
+    <p class="muted">Log in or sign up to list surplus food, track claims, or manage your NGO's donations.</p>
+    <a href="#auth" class="btn btn--primary" data-nav="auth">Log in / Sign up</a>
+  </div>
+
+  <!-- RESTAURANT DASHBOARD -->
+  <div id="dashRestaurant" hidden>
+    <div class="dash-head">
+      <div>
+        <p class="eyebrow">RESTAURANT DASHBOARD</p>
+        <h2 class="h2" id="restDashName">—</h2>
+      </div>
+      <div class="impact-chips" id="restImpact"></div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="panel">
+        <h3>List surplus food</h3>
+        <form id="listingForm" class="form">
+          <label>Item name
+            <input type="text" id="lfItem" required placeholder="e.g. Chicken Biryani">
+          </label>
+          <div class="form__row">
+            <label>Quantity
+              <input type="number" id="lfQty" min="1" required placeholder="12">
+            </label>
+            <label>Unit
+              <select id="lfUnit">
+                <option>portions</option>
+                <option>kg</option>
+                <option>boxes</option>
+                <option>plates</option>
+              </select>
+            </label>
+          </div>
+          <label class="toggle-row">
+            <input type="checkbox" id="lfIsDonation">
+            List as a free NGO donation (₹0)
+          </label>
+          <label id="lfPriceWrap">Price for the whole lot (₹)
+            <input type="number" id="lfPrice" min="0" placeholder="e.g. 300 (≈50% off)">
+          </label>
+          <label class="toggle-row">
+            <input type="checkbox" id="lfNgoOnly">
+            NGO-only (bulk lot — skip regular buyers)
+          </label>
+          <div class="form__row">
+            <label>Prepared how long ago (hours)
+              <input type="number" id="lfPrep" min="0" step="0.5" required placeholder="1.5">
+            </label>
+            <label>Pickup window (minutes)
+              <input type="number" id="lfWindow" min="10" required placeholder="90">
+            </label>
+          </div>
+          <p class="safety-warn" id="lfSafetyWarn" hidden>⚠️ Prepared more than 4 hours ago — FSSAI safe-holding guidance recommends immediate NGO-priority pickup rather than a long listing window.</p>
+          <label>Pickup address
+            <input type="text" id="lfAddress" required placeholder="Shop address">
+          </label>
+          <button type="button" class="btn btn--ghost" id="lfUseLocation">📍 Use my current location</button>
+          <p class="muted small" id="lfLocStatus">Location not set — using approximate area default.</p>
+          <label class="toggle-row">
+            <input type="checkbox" id="lfSafetyConfirm" required>
+            I confirm this food was prepared and stored hygienically and is safe to eat within the stated window.
+          </label>
+          <p class="form__error" id="lfError"></p>
+          <button class="btn btn--primary btn--block" type="submit">Publish listing</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h3>Your active &amp; past listings</h3>
+        <div id="restListings" class="listing-stack"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NGO / USER DASHBOARD -->
+  <div id="dashClaimant" hidden>
+    <div class="dash-head">
+      <div>
+        <p class="eyebrow" id="claimantEyebrow">YOUR ACCOUNT</p>
+        <h2 class="h2" id="claimantName">—</h2>
+      </div>
+      <div class="impact-chips" id="claimantImpact"></div>
+    </div>
+    <div class="ngo-badge-row" id="ngoBadgeRow" hidden>
+      <span class="badge badge--verified">✅ Verified NGO</span>
+      <span class="muted small">Reg. no. <span id="ngoRegNo" class="mono"></span> — you get priority on donation &amp; escalated listings.</span>
+    </div>
+    <div class="panel">
+      <h3>Your claims</h3>
+      <div id="myClaims" class="listing-stack"></div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ===================== BROWSE ===================== -->
+<section class="page" id="page-browse" hidden>
+  <div class="browse-head">
+    <div>
+      <p class="eyebrow">LIVE LISTINGS</p>
+      <h2 class="h2">Food near you, on the clock</h2>
+    </div>
+    <div class="browse-controls">
+      <button class="btn btn--ghost" id="geoBtn">📍 Use my location</button>
+      <span class="muted small" id="geoStatus">Showing distances from Kochi city centre (default).</span>
+      <select id="radiusFilter">
+        <option value="2">Within 2 km</option>
+        <option value="5" selected>Within 5 km</option>
+        <option value="10">Within 10 km</option>
+        <option value="1000">Any distance</option>
+      </select>
+      <select id="typeFilter">
+        <option value="all">All listings</option>
+        <option value="discount">Discounted only</option>
+        <option value="donation">Free donations only</option>
+        <option value="escalated">🚨 Escalated (free now)</option>
+      </select>
+      <select id="sortFilter">
+        <option value="urgency">Sort: most urgent</option>
+        <option value="distance">Sort: nearest</option>
+        <option value="newest">Sort: newest</option>
+      </select>
+    </div>
+  </div>
+  <div id="browseGrid" class="listing-grid"></div>
+  <p class="muted center" id="browseEmpty" hidden>No listings match your filters right now — check back soon, new surplus gets listed every evening.</p>
+</section>
+
+<!-- ===================== FOOD SAFETY ===================== -->
+<section class="page" id="page-safety" hidden>
+  <section class="section">
+    <p class="eyebrow">THE PART YOU CAN'T SKIP</p>
+    <h2 class="h2">Food safety &amp; liability</h2>
+    <p class="hero__lede">Anndaan sits in the middle of something people eat. Every listing and every claim is built around the same three rules.</p>
+
+    <div class="safety-grid">
+      <div class="safety-card">
+        <h3>Time limits, not guesswork</h3>
+        <p>Restaurants must declare how long ago food was prepared. Listings older than the FSSAI-recommended safe-holding window (roughly 4 hours at room temperature for cooked, perishable food) are flagged and steered toward immediate NGO pickup instead of a long open window.</p>
+      </div>
+      <div class="safety-card">
+        <h3>Good-faith donor protection</h3>
+        <p>India has been discussing Good Samaritan-style protection for good-faith food donors, similar to donation-liability laws elsewhere. Anndaan's donation listings include a standard disclaimer so restaurants can give away safe surplus without fearing liability for something outside their control after handoff.</p>
+      </div>
+      <div class="safety-card">
+        <h3>Mandatory listing checklist</h3>
+        <p>Every listing requires a prep-time field, a pickup deadline, and a hygiene confirmation checkbox before it goes live. No prep-time field, no listing.</p>
+      </div>
+    </div>
+
+    <div class="disclaimer-box">
+      <h3>Standard donation disclaimer (shown on every free listing)</h3>
+      <p>"This food is donated in good faith and was reported as safe and fit for consumption at the time of listing. The donor is not liable for its condition after pickup, provided it was prepared, stored, and handed over in line with the stated prep time and hygiene confirmation."</p>
+    </div>
+  </section>
+</section>
+
+<!-- ===================== ABOUT ===================== -->
+<section class="page" id="page-about" hidden>
+  <section class="section">
+    <p class="eyebrow">ABOUT ANNDAAN</p>
+    <h2 class="h2">One platform, two ways to rescue a meal</h2>
+    <p class="hero__lede">"Anndaan" — the giving of food — is a self-serve marketplace where restaurants list end-of-day surplus with a countdown attached. Nearby buyers can claim it at a discount; verified NGOs can claim it free, in bulk, or automatically once the clock runs low. No phone calls, no manual routing — just a listing, a claim, and an OTP at the door.</p>
+    <div class="about-grid">
+      <div>
+        <h3>What makes it different</h3>
+        <ul class="check-list">
+          <li>Both tracks — paid discount and free donation — live on one platform, not two.</li>
+          <li>Auto-escalation means unclaimed surplus doesn't just expire; it gets a second chance with NGOs.</li>
+          <li>OTP / QR handoff gives restaurants real proof of pickup, not a promise.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Built for</h3>
+        <ul class="check-list">
+          <li><strong>Restaurants &amp; shops</strong> — turn end-of-day surplus into either revenue or a tax-friendly donation record.</li>
+          <li><strong>Regular buyers</strong> — good food, steep discount, short walk.</li>
+          <li><strong>Verified NGOs</strong> — a live feed of nearby donations instead of a phone tree.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</section>
+
+</main>
+
+<!-- ===================== MODALS ===================== -->
+<div class="modal-overlay" id="claimModalOverlay" hidden>
+  <div class="modal">
+    <button class="modal__close" id="claimModalClose" aria-label="Close">✕</button>
+    <h3>Confirm your claim</h3>
+    <p id="claimModalText" class="muted"></p>
+    <div class="form__row">
+      <button class="btn btn--ghost" id="claimCancelBtn" type="button">Cancel</button>
+      <button class="btn btn--primary" id="claimConfirmBtn" type="button">Confirm claim</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="ticketModalOverlay" hidden>
+  <div class="modal modal--ticket">
+    <button class="modal__close" id="ticketModalClose" aria-label="Close">✕</button>
+    <h3>Pickup ticket</h3>
+    <p class="muted small">Show this at pickup. The restaurant will enter this code to confirm.</p>
+    <div class="ticket ticket--otp">
+      <div class="ticket__row">
+        <span class="ticket__tag" id="ticketTag">CLAIMED</span>
+        <span class="mono" id="ticketId"></span>
+      </div>
+      <h3 class="ticket__item" id="ticketItem"></h3>
+      <p class="ticket__meta" id="ticketMeta"></p>
+      <div class="otp-display">
+        <span>OTP</span>
+        <strong class="mono" id="ticketOtp">0000</strong>
+      </div>
+      <div id="ticketQr" class="ticket-qr"></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="verifyModalOverlay" hidden>
+  <div class="modal">
+    <button class="modal__close" id="verifyModalClose" aria-label="Close">✕</button>
+    <h3>Verify pickup</h3>
+    <p class="muted small">Ask the claimant for their 4-digit OTP and enter it below to close out this listing.</p>
+    <form id="verifyForm" class="form">
+      <input type="hidden" id="verifyListingId">
+      <label>OTP
+        <input type="text" id="verifyOtpInput" inputmode="numeric" maxlength="4" placeholder="1234" required>
+      </label>
+      <p class="form__error" id="verifyError"></p>
+      <button class="btn btn--primary btn--block" type="submit">Confirm pickup</button>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<!-- ===================== FOOTER ===================== -->
+<footer class="footer">
+  <div class="footer__inner">
+    <div class="footer__brand">
+      <img src="images/logo.svg" alt="" width="28" height="28">
+      <span>Anndaan</span>
+    </div>
+    <p class="muted small">A self-serve surplus-food marketplace — discounted claims for buyers, free claims for verified NGOs, all on a countdown. Built as a demo; all data lives in your browser only.</p>
+    <div class="footer__links">
+      <a href="#home" data-nav="home">Home</a>
+      <a href="#browse" data-nav="browse">Browse</a>
+      <a href="#safety" data-nav="safety">Food safety</a>
+      <a href="#about" data-nav="about">About</a>
+    </div>
+  </div>
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="js/script.js"></script>
+</body>
+</html>
