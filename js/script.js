@@ -303,6 +303,50 @@
     return div.innerHTML;
   }
 
+   /* ---------- pull real user data from Supabase ---------- */
+  async function loadUserFromSupabase(authUserId) {
+    const { data: profile } = await db
+      .from("profiles")
+      .select("*")
+      .eq("id", authUserId)
+      .maybeSingle();
+
+    if (!profile) return null;
+
+    const { data: authData } = await db.auth.getUser();
+    const email = authData?.user?.email || "";
+
+    let extra = {
+      address: "",
+      lat: jitter(DEFAULT_LAT, 2),
+      lng: jitter(DEFAULT_LNG, 2),
+      ngoReg: null,
+      ngoVerified: undefined,
+    };
+
+    if (profile.role === "restaurant") {
+      const { data: rest } = await db
+        .from("restaurants")
+        .select("*")
+        .eq("user_id", authUserId)
+        .maybeSingle();
+      if (rest) {
+        extra.address = rest.address || "";
+        if (rest.lat != null) extra.lat = rest.lat;
+        if (rest.lng != null) extra.lng = rest.lng;
+      }
+    }
+
+    return {
+      id: authUserId,
+      role: profile.role,
+      name: profile.full_name || "",
+      email,
+      phone: profile.phone || "",
+      ...extra,
+    };
+  }
+
   /* ==========================================================
      AUTH PAGE
      ========================================================== */
@@ -320,6 +364,7 @@
     document.getElementById("signupRegWrap").hidden = e.target.value !== "ngo";
   });
 
+   /*
   document.getElementById("loginForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const email = document.getElementById("loginEmail").value.trim().toLowerCase();
@@ -337,7 +382,38 @@
     toast(`Welcome back, ${user.name}`);
     navigateTo("dashboard");
   });
+*/
 
+   document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById("loginError");
+    const email = document.getElementById("loginEmail").value.trim().toLowerCase();
+    const pw = document.getElementById("loginPassword").value;
+
+    const { data, error } = await db.auth.signInWithPassword({ email, password: pw });
+    if (error) {
+      errEl.textContent = "No account matches that email and password.";
+      return;
+    }
+    errEl.textContent = "";
+
+    const user = await loadUserFromSupabase(data.user.id);
+    if (!user) {
+      errEl.textContent = "Logged in, but couldn't load your profile.";
+      return;
+    }
+
+    const users = store.get(DB_USERS, []).filter((u) => u.id !== user.id);
+    users.push(user);
+    store.set(DB_USERS, users);
+
+    setSession(user.id);
+    refreshAuthUI();
+    renderNotifications();
+    toast(`Welcome back, ${user.name}`);
+    navigateTo("dashboard");
+  });
+   
   document.querySelectorAll("[data-demo]").forEach((btn) => {
     btn.addEventListener("click", () => {
       const map = { restaurant: "restaurant@demo.com", ngo: "ngo@demo.com", user: "user@demo.com" };
@@ -346,6 +422,8 @@
     });
   });
 
+
+   /*
   document.getElementById("signupForm").addEventListener("submit", (e) => {
     e.preventDefault();
     const errEl = document.getElementById("signupError");
@@ -387,6 +465,69 @@
     e.target.reset();
     navigateTo("dashboard");
   });
+  */
+
+
+   document.getElementById("signupForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errEl = document.getElementById("signupError");
+    const role = document.getElementById("signupRole").value;
+    const name = document.getElementById("signupName").value.trim();
+    const email = document.getElementById("signupEmail").value.trim().toLowerCase();
+    const phone = document.getElementById("signupPhone").value.trim();
+    const password = document.getElementById("signupPassword").value;
+    const address = document.getElementById("signupAddress").value.trim();
+    const ngoReg = document.getElementById("signupReg").value.trim();
+
+    if (role === "ngo" && !ngoReg) {
+      errEl.textContent = "NGO registration number is required for NGO accounts.";
+      return;
+    }
+    if (password.length < 6) {
+      errEl.textContent = "Password must be at least 6 characters.";
+      return;
+    }
+    errEl.textContent = "";
+
+    const { data, error } = await db.auth.signUp({
+      email,
+      password,
+      options: { data: { role, full_name: name, phone } },
+    });
+    if (error) {
+      errEl.textContent = error.message;
+      return;
+    }
+
+    const authUserId = data.user.id;
+
+    if (role === "restaurant") {
+      await db.from("restaurants").insert({
+        user_id: authUserId, name, phone, address,
+        lat: jitter(DEFAULT_LAT, 2), lng: jitter(DEFAULT_LNG, 2),
+      });
+    }
+
+    const user = await loadUserFromSupabase(authUserId);
+    if (user && role === "ngo") {
+      user.ngoReg = ngoReg;
+      user.ngoVerified = true;
+    }
+
+    if (user) {
+      const users = store.get(DB_USERS, []).filter((u) => u.id !== authUserId);
+      users.push(user);
+      store.set(DB_USERS, users);
+    }
+
+    setSession(authUserId);
+    refreshAuthUI();
+    renderNotifications();
+    toast(role === "ngo" ? "NGO account created — verification simulated ✔" : "Account created!");
+    e.target.reset();
+    navigateTo("dashboard");
+  });
+   
 
   /* ==========================================================
      COUNTDOWN HELPERS
