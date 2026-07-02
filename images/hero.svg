@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320">
+  <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+    <stop offset="0" stop-color="#16a34a"/><stop offset="1" stop-color="#65a30d"/>
+  </linearGradient></defs>
+  <circle cx="200" cy="160" r="140" fill="#dcfce7"/>
+  <ellipse cx="200" cy="250" rx="130" ry="16" fill="#16a34a" opacity=".12"/>
+  <path d="M90 190c0 45 50 70 110 70s110-25 110-70H90z" fill="url(#g)"/>
+  <rect x="80" y="184" width="240" height="10" rx="5" fill="#15803d"/>
+  <circle cx="150" cy="160" r="26" fill="#f59e0b"/><circle cx="150" cy="160" r="18" fill="#fbbf24"/>
+  <circle cx="210" cy="150" r="30" fill="#ef4444"/><circle cx="210" cy="150" r="21" fill="#f87171"/>
+  <circle cx="268" cy="162" r="24" fill="#84cc16"/><circle cx="268" cy="162" r="16" fill="#a3e635"/>
+  <path d="M200 60c-2 22 8 36 24 42-14 4-26-2-30-14-4 12-16 18-30 14 16-6 26-20 24-42h12z" fill="#16a34a"/>
+  <circle cx="330" cy="80" r="26" fill="#fff" stroke="#16a34a" stroke-width="4"/>
+  <path d="M330 66v14l10 8" stroke="#16a34a" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="66" cy="90" r="18" fill="#fff" stroke="#f59e0b" stroke-width="4"/>
+  <text x="66" y="97" text-anchor="middle" font-size="18">₹</text>
+</svg>
